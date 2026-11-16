@@ -1,135 +1,205 @@
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 public class DashboardFrame extends JFrame {
-    private JButton inventoryButton;
-    private JButton issueButton;
-    private JButton logoutButton;
-    private JLabel remainingStockLabel;
-    private JLabel issuedStockLabel;
+
+    private JLabel lblRemainingStock;
+    private JLabel lblTotalIssued;
 
     public DashboardFrame() {
+        initUI();
+    }
+
+    public DashboardFrame(String username) {
+        initUI();
+    }
+
+    private void initUI() {
         setTitle("Stationery Management System - Dashboard");
-        setSize(760, 520);
+        setSize(680, 490);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(null);
+        setLocationRelativeTo(null);
         setResizable(false);
-        getContentPane().setBackground(new Color(240, 244, 248));
+        setLayout(new BorderLayout());
 
-        // Top Header Banner
+        // Top Royal Blue Header
         JPanel headerPanel = new JPanel();
-        headerPanel.setLayout(null);
-        headerPanel.setBackground(new Color(30, 58, 138));
-        headerPanel.setBounds(0, 0, 760, 80);
-        add(headerPanel);
+        headerPanel.setBackground(new Color(15, 42, 110));
+        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+        headerPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        JLabel welcomeLabel = new JLabel("STATIONERY MANAGEMENT SYSTEM", SwingConstants.CENTER);
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 22));
-        welcomeLabel.setForeground(Color.WHITE);
-        welcomeLabel.setBounds(50, 15, 660, 30);
-        headerPanel.add(welcomeLabel);
+        JLabel lblTitle = new JLabel("STATIONERY MANAGEMENT SYSTEM");
+        lblTitle.setFont(new Font("Arial", Font.BOLD, 22));
+        lblTitle.setForeground(Color.WHITE);
+        lblTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel subLabel = new JLabel("Admin Control Panel & Live Stock Overview", SwingConstants.CENTER);
-        subLabel.setFont(new Font("Arial", Font.PLAIN, 13));
-        subLabel.setForeground(new Color(219, 234, 254));
-        subLabel.setBounds(50, 45, 660, 20);
-        headerPanel.add(subLabel);
+        JLabel lblSubtitle = new JLabel("Admin Control Panel & Live Stock Overview");
+        lblSubtitle.setFont(new Font("Arial", Font.PLAIN, 13));
+        lblSubtitle.setForeground(new Color(203, 213, 225));
+        lblSubtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // 1. Remaining Stock Card
-        remainingStockLabel = new JLabel("Remaining Stock: 0", SwingConstants.CENTER);
-        remainingStockLabel.setOpaque(true);
-        remainingStockLabel.setBackground(new Color(220, 252, 231));
-        remainingStockLabel.setBorder(BorderFactory.createLineBorder(new Color(22, 163, 74), 2));
-        remainingStockLabel.setBounds(60, 110, 300, 105);
-        add(remainingStockLabel);
+        headerPanel.add(lblTitle);
+        headerPanel.add(Box.createRigidArea(new Dimension(0, 6)));
+        headerPanel.add(lblSubtitle);
+        add(headerPanel, BorderLayout.NORTH);
 
-        // 2. Total Issued Card
-        issuedStockLabel = new JLabel("Total Issued: 0", SwingConstants.CENTER);
-        issuedStockLabel.setOpaque(true);
-        issuedStockLabel.setBackground(new Color(254, 243, 199));
-        issuedStockLabel.setBorder(BorderFactory.createLineBorder(new Color(217, 119, 6), 2));
-        issuedStockLabel.setBounds(400, 110, 300, 105);
-        add(issuedStockLabel);
+        // Center Content Panel
+        JPanel centerPanel = new JPanel();
+        centerPanel.setBackground(new Color(241, 245, 249));
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+        centerPanel.setBorder(new EmptyBorder(22, 45, 25, 45));
+
+        // Live KPI Cards Row
+        JPanel cardsPanel = new JPanel(new GridLayout(1, 2, 22, 0));
+        cardsPanel.setBackground(new Color(241, 245, 249));
+        cardsPanel.setMaximumSize(new Dimension(600, 105));
+
+        // Card 1: Remaining Stock
+        JPanel cardStock = new JPanel();
+        cardStock.setBackground(new Color(236, 253, 245));
+        cardStock.setBorder(BorderFactory.createCompoundBorder(
+                new LineBorder(new Color(16, 185, 129), 2, true),
+                new EmptyBorder(12, 15, 12, 15)
+        ));
+        cardStock.setLayout(new BoxLayout(cardStock, BoxLayout.Y_AXIS));
+
+        JLabel lblStockTitle = new JLabel("REMAINING STOCK");
+        lblStockTitle.setFont(new Font("Arial", Font.BOLD, 12));
+        lblStockTitle.setForeground(new Color(6, 95, 70));
+        lblStockTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        lblRemainingStock = new JLabel("0");
+        lblRemainingStock.setFont(new Font("Arial", Font.BOLD, 28));
+        lblRemainingStock.setForeground(new Color(4, 120, 87));
+        lblRemainingStock.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        cardStock.add(lblStockTitle);
+        cardStock.add(Box.createRigidArea(new Dimension(0, 8)));
+        cardStock.add(lblRemainingStock);
+
+        // Card 2: Total Issued Items
+        JPanel cardIssued = new JPanel();
+        cardIssued.setBackground(new Color(255, 251, 235));
+        cardIssued.setBorder(BorderFactory.createCompoundBorder(
+                new LineBorder(new Color(245, 158, 11), 2, true),
+                new EmptyBorder(12, 15, 12, 15)
+        ));
+        cardIssued.setLayout(new BoxLayout(cardIssued, BoxLayout.Y_AXIS));
+
+        JLabel lblIssuedTitle = new JLabel("TOTAL ISSUED ITEMS");
+        lblIssuedTitle.setFont(new Font("Arial", Font.BOLD, 12));
+        lblIssuedTitle.setForeground(new Color(146, 64, 14));
+        lblIssuedTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        lblTotalIssued = new JLabel("0");
+        lblTotalIssued.setFont(new Font("Arial", Font.BOLD, 28));
+        lblTotalIssued.setForeground(new Color(180, 83, 9));
+        lblTotalIssued.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        cardIssued.add(lblIssuedTitle);
+        cardIssued.add(Box.createRigidArea(new Dimension(0, 8)));
+        cardIssued.add(lblTotalIssued);
+
+        cardsPanel.add(cardStock);
+        cardsPanel.add(cardIssued);
+        centerPanel.add(cardsPanel);
+        centerPanel.add(Box.createRigidArea(new Dimension(0, 26)));
 
         // Action Buttons
-        inventoryButton = new JButton("Manage Inventory");
-        inventoryButton.setFont(new Font("Arial", Font.BOLD, 16));
-        inventoryButton.setBackground(new Color(37, 99, 235));
-        inventoryButton.setForeground(Color.WHITE);
-        inventoryButton.setFocusPainted(false);
-        inventoryButton.setBounds(155, 245, 450, 52);
-        add(inventoryButton);
+        JButton btnManageInventory = createMenuButton("Manage Inventory", new Color(29, 78, 216));
+        JButton btnIssueItems = createMenuButton("Issue Items", new Color(22, 163, 74));
+        JButton btnLogout = createMenuButton("Logout", new Color(220, 38, 38));
 
-        issueButton = new JButton("Issue Items");
-        issueButton.setFont(new Font("Arial", Font.BOLD, 16));
-        issueButton.setBackground(new Color(5, 150, 105));
-        issueButton.setForeground(Color.WHITE);
-        issueButton.setFocusPainted(false);
-        issueButton.setBounds(155, 315, 450, 52);
-        add(issueButton);
+        centerPanel.add(btnManageInventory);
+        centerPanel.add(Box.createRigidArea(new Dimension(0, 14)));
+        centerPanel.add(btnIssueItems);
+        centerPanel.add(Box.createRigidArea(new Dimension(0, 14)));
+        centerPanel.add(btnLogout);
 
-        logoutButton = new JButton("Logout");
-        logoutButton.setFont(new Font("Arial", Font.BOLD, 15));
-        logoutButton.setBackground(new Color(220, 38, 38));
-        logoutButton.setForeground(Color.WHITE);
-        logoutButton.setFocusPainted(false);
-        logoutButton.setBounds(155, 385, 450, 48);
-        add(logoutButton);
+        add(centerPanel, BorderLayout.CENTER);
 
-        inventoryButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        // Load Live Stats from MySQL
+        loadLiveCounts();
+
+        // Button Actions (Safe & Visible)
+        btnManageInventory.addActionListener(e -> {
+            try {
+                InventoryFrame inv = new InventoryFrame();
+                inv.setVisible(true);
                 dispose();
-                new InventoryFrame();
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error opening Inventory: " + ex.getMessage());
             }
         });
 
-        issueButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        btnIssueItems.addActionListener(e -> {
+            try {
+                IssueFrame issue = new IssueFrame();
+                issue.setVisible(true);
                 dispose();
-                new IssueFrame();
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error opening Issue Items: " + ex.getMessage());
             }
         });
 
-        logoutButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        btnLogout.addActionListener(e -> {
+            try {
+                LoginFrame login = new LoginFrame();
+                login.setVisible(true);
                 dispose();
-                new LoginFrame();
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error during Logout: " + ex.getMessage());
             }
         });
 
-        loadDashboardStats();
-        setLocationRelativeTo(null);
         setVisible(true);
     }
 
-    private void loadDashboardStats() {
-        try {
-            Connection conn = DBConnection.getConnection();
+    private JButton createMenuButton(String text, Color bgColor) {
+        JButton btn = new JButton(text);
+        btn.setFont(new Font("Arial", Font.BOLD, 15));
+        btn.setBackground(bgColor);
+        btn.setForeground(Color.WHITE);
+        btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btn.setMaximumSize(new Dimension(600, 46));
+        btn.setPreferredSize(new Dimension(600, 46));
+        return btn;
+    }
 
-            ResultSet rs1 = conn.createStatement().executeQuery("SELECT SUM(quantity) FROM inventory");
-            if (rs1.next()) {
-                int rem = rs1.getInt(1);
-                remainingStockLabel.setText("<html><center><span style='font-size:13px; color:#166534;'>REMAINING STOCK</span><br><span style='font-size:26px; color:#14532d;'><b>" + rem + "</b></span></center></html>");
+    private void loadLiveCounts() {
+        try (Connection conn = DBConnection.getConnection()) {
+            // Remaining Stock Sum
+            try (PreparedStatement pst1 = conn.prepareStatement("SELECT COALESCE(SUM(quantity), 0) FROM inventory");
+                 ResultSet rs1 = pst1.executeQuery()) {
+                if (rs1.next()) {
+                    lblRemainingStock.setText(String.valueOf(rs1.getInt(1)));
+                }
             }
 
-            ResultSet rs2 = conn.createStatement().executeQuery("SELECT SUM(quantity_issued) FROM issued_items");
-            if (rs2.next()) {
-                int iss = rs2.getInt(1);
-                issuedStockLabel.setText("<html><center><span style='font-size:13px; color:#92400e;'>TOTAL ISSUED ITEMS</span><br><span style='font-size:26px; color:#78350f;'><b>" + iss + "</b></span></center></html>");
+            // Total Issued Items Sum
+            try (PreparedStatement pst2 = conn.prepareStatement("SELECT COALESCE(SUM(quantity_issued), 0) FROM issued_items");
+                 ResultSet rs2 = pst2.executeQuery()) {
+                if (rs2.next()) {
+                    lblTotalIssued.setText(String.valueOf(rs2.getInt(1)));
+                }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
     public static void main(String[] args) {
-        new DashboardFrame();
+        SwingUtilities.invokeLater(() -> new DashboardFrame().setVisible(true));
     }
 }
